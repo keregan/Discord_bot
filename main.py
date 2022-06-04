@@ -1,4 +1,6 @@
 import asyncio
+from datetime import time
+from itertools import count
 from pickle import NONE
 from discord.ext import commands, tasks
 from discord.voice_client import VoiceClient
@@ -6,6 +8,8 @@ import random
 import youtube_dl
 from discord.utils import get
 import urllib.parse, urllib.request, re
+from bs4 import BeautifulSoup as BS, BeautifulSoup
+import requests
 from youtube_dl import YoutubeDL
 from asyncio import sleep
 import discord
@@ -13,10 +17,6 @@ from discord import ActivityType, Activity, FFmpegPCMAudio
 from discord.ext import commands
 
 global v_c
-#
-# intents = discord.Intents().all()
-# client = discord.Client(intents=intents)
-# bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 bot = commands.Bot(command_prefix='>')
@@ -26,6 +26,44 @@ client = discord.Client()
 @bot.event
 async def on_ready():  # Start bot
     print('Bot connect')
+    channel = bot.get_channel(982738188911132683)
+    while True:
+        await asyncio.sleep(60)
+        passers_1 = requests.get("https://stopgame.ru/news")
+        html = BS(passers_1.content, 'html.parser')
+        title = html.find('div', class_='caption')
+        score = int(len(str(title)))
+        old = (str(title))
+
+        tegg = ""
+        tred = 0
+        j = 44
+        while j < int(score):
+            if old[j] == ">":
+                j = int(score)
+            else:
+                tegg = tegg + old[j]
+                j = j + 1
+        score_2 = int(len(tegg))
+        Remove_last = tegg[:score_2 - 1]
+        ends = "https://stopgame.ru/" + Remove_last
+        las_end = "Последнии новости на stopgame.ru: " + ends
+
+        messages = await channel.history(limit=200).flatten()
+        word = ends
+        for msg in messages:
+            if word in msg.content:
+                break
+            else:
+                await channel.send(las_end)
+            break
+        await asyncio.sleep(60)
+
+
+# @bot. command(pass_context=True)
+# @commands.has_permissions(change_nickname=True)
+# async def chnick(ctx, nick):
+#     await client.edit(nick=nick)
 
 
 @bot.command()
@@ -123,16 +161,21 @@ async def play(ctx, *arg):  # Http ran
             info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
             # videotitle = info.get('title')
             # await ctx.send(f"{videotitle}")
-
+    videotitle = info.get('title')
     URL = info['formats'][0]['url']
-
+    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name = videotitle, type = discord.ActivityType.listening))
     v_c.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
-    videotitle = info.get('title', 'Video   with ID: '+info.get('id', 'unknown'))
+    videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
     await ctx.send(f"Playing {videotitle}")
-
+    videotitle = videotitle + "       "
+    while v_c.is_playing:
+        await asyncio.sleep(1)
+        videotitle = videotitle[1:] + videotitle[0]
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name = videotitle, type = discord.ActivityType.listening))
     while v_c.is_playing():
         await sleep(1)
-    # if not v_c.is_paused():
+    if not v_c.is_paused():
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name = "Звук тишины", type = discord.ActivityType.listening))
     # await v_c.disconnect()
 
 
@@ -193,7 +236,6 @@ async def helping(ctx):  # Write-trigger bot
                    ">join - Подключить бота к каналу\n"
                    ">leave - Отключить бота от канала\n"
                    ">stop - Остановить песню")
-
 
 
 bot.run('OTgxOTM0NzM1MDY2NTUwMzEy.GW_gVb.bdlkuj0_xH2wAGQSMrI595SDHcsy6xXHg8wORo')
