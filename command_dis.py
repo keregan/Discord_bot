@@ -11,6 +11,7 @@ from discord.ext import commands
 from youtube_dl import YoutubeDL
 from youtubesearchpython import VideosSearch
 
+global v_c
 bot_command = commands.Bot(command_prefix='>')
 client = discord.Client()
 
@@ -57,28 +58,84 @@ async def news_stopgame(bot):
         await channel.send(las_end)
 
 
-async def joi_reactor(bot):
+async def genshin_hub(bot):
     channel = bot.get_channel(954827377085669396)
-    url = "http://joyreactor.cc/tag/%D0%9C%D1%83%D0%BB%D1%8C%D1%82%D1%8D%D1%80%D0%BE%D1%82%D0%B8%D0%BA%D0%B0"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-    text = requests.get(url, headers=headers)
-    soup = BeautifulSoup(text.content, 'html.parser')
-    div_1 = soup.find("div", class_="postContainer")
-    div_2 = div_1.find("div", class_="post_content")
-    image = div_2.find("a", class_="prettyPhotoLink").get("href")
+    vk_pars = "133a17f4133a17f4133a17f4421346fe9c1133a133a17f471a7b0c5bcca6560b561d7f0"
+    vk_ver = "5.131"
+    domain = "genshin_hub"
 
-    messages = await channel.history(limit=200).flatten()
-    word = image
+    reponse = requests.get('https://api.vk.com/method/wall.get',
+                           params={
+                               'access_token': vk_pars,
+                               'v': vk_ver,
+                               'domain': domain,
+                               'count': 1,
+                               'offset': 1
+                           }
+                           )
+    posts = reponse.json()['response']['items']
     i = 0
-    for msg in messages:
-        if msg.content == word:
-            no_post_2 = 0
-            break
-        else:
-            no_post_2 = 1
-    if no_post_2 == 1:
-        await channel.send(image)
+    for post in posts:
+        try:
+            if "attachments" in post:
+                post = post["attachments"]
+                if post[0]["type"] == "photo":
+                    for i in range(len(post)):
+                        url_photo = post[i]['photo']['sizes'][-1]['url']
+                        messages = await channel.history(limit=200).flatten()
+                        word = url_photo
+                        i = 0
+                        for msg in messages:
+                            if msg.content == word:
+                                no_post_2 = 0
+                                break
+                            else:
+                                no_post_2 = 1
+                        if no_post_2 == 1:
+                            await channel.send(url_photo)
+                        await asyncio.sleep(1)
+        except:
+            pass
+
+
+async def genshin_giarts(bot):
+    channel = bot.get_channel(982160360897396736)
+    vk_pars = "133a17f4133a17f4133a17f4421346fe9c1133a133a17f471a7b0c5bcca6560b561d7f0"
+    vk_ver = "5.131"
+    domain = "giarts"
+
+    reponse = requests.get('https://api.vk.com/method/wall.get',
+                           params={
+                               'access_token': vk_pars,
+                               'v': vk_ver,
+                               'domain': domain,
+                               'count': 1,
+                               'offset': 1
+                           }
+                           )
+    posts = reponse.json()['response']['items']
+    i = 0
+    for post in posts:
+        try:
+            if "attachments" in post:
+                post = post["attachments"]
+                if post[0]["type"] == "photo":
+                    for i in range(len(post)):
+                        url_photo = post[i]['photo']['sizes'][-1]['url']
+                        messages = await channel.history(limit=200).flatten()
+                        word = url_photo
+                        i = 0
+                        for msg in messages:
+                            if msg.content == word:
+                                no_post_2 = 0
+                                break
+                            else:
+                                no_post_2 = 1
+                        if no_post_2 == 1:
+                            await channel.send(url_photo)
+                        await asyncio.sleep(1)
+        except:
+            pass
 
 
 async def news_genshinimpact(bot):
@@ -266,7 +323,7 @@ async def play(ctx, arg, bot):  # Http ran
 
 
 @bot_command.command()  # Youtube_list
-async def youtube_list(arg):  # Youtube
+async def youtube_list(ctx, arg):  # Youtube
     arg = str(arg).replace("(", "")
     arg = str(arg).replace(')', '')
     arg = str(arg).replace(',', '')
@@ -290,6 +347,238 @@ async def youtube_list(arg):  # Youtube
     await ctx.send("3) " + res_name_3)
     await ctx.send("4) " + res_name_4)
     await ctx.send("5) " + res_name_5)
+
+
+async def youtube_p1(ctx, bot):
+    messages = await ctx.history(limit=20).flatten()
+    word = ">y"
+    i = 0
+    for msg in messages:
+        if word in msg.content:
+            no_post_3 = 1
+            name = msg.content
+            break
+        else:
+            no_post_3 = 0
+
+    if no_post_3 == 0:
+        await ctx.send('Повторите запрос')
+    else:
+        voice_channel = ctx.message.author.voice.channel
+        v_c = ctx.channel.guild.voice_client
+        url_name = name.replace('>y ', '')
+        videosSearch = VideosSearch(url_name, limit=1)
+        res_url_1 = videosSearch.result()['result'][0]['link']
+
+        await bot.change_presence(activity=Activity(name="music", type=ActivityType.listening))
+        voice_channel = ctx.message.author.voice.channel
+        voice = ctx.channel.guild.voice_client
+        if voice is None:
+            voice = await voice_channel.connect()
+        else:
+            ctx.voice_client.stop()
+
+        with YoutubeDL(YDL_OPTIONS) as ydl:
+            ydl.cache.remove()
+            if 'https://' in res_url_1:
+                info = ydl.extract_info(res_url_1, download=False)
+        videotitle = info.get('title')
+
+        URL = info['formats'][0]['url']
+
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
+        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
+        await ctx.send(f"Playing {videotitle}")
+        videotitle = videotitle + "       "
+        # while v_c.is_playing:
+        #     await asyncio.sleep(1)
+        #     videotitle = videotitle[1:] + videotitle[0]
+        #     await bot.change_presence(status=discord.Status.online,
+        #                               activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+
+
+async def youtube_p2(ctx):
+    messages = await ctx.history(limit=20).flatten()
+    word = ">y"
+    i = 0
+    for msg in messages:
+        if word in msg.content:
+            no_post_3 = 1
+            name = msg.content
+            break
+        else:
+            no_post_3 = 0
+
+    if no_post_3 == 0:
+        await ctx.send('Повторите запрос')
+    else:
+        voice_channel = ctx.message.author.voice.channel
+        v_c = ctx.channel.guild.voice_client
+        url_name = name.replace('>y ', '')
+        videosSearch = VideosSearch(url_name, limit=2)
+        res_url_1 = videosSearch.result()['result'][1]['link']
+
+        await bot.change_presence(activity=Activity(name="music", type=ActivityType.listening))
+        voice_channel = ctx.message.author.voice.channel
+        voice = ctx.channel.guild.voice_client
+        if voice is None:
+            voice = await voice_channel.connect()
+        else:
+            ctx.voice_client.stop()
+
+        with YoutubeDL(YDL_OPTIONS) as ydl:
+            ydl.cache.remove()
+            if 'https://' in res_url_1:
+                info = ydl.extract_info(res_url_1, download=False)
+            else:
+                info = ydl.extract_info(f"ytsearch:{res_url_1}", download=False)['entries'][0]
+        videotitle = info.get('title')
+
+        URL = info['formats'][0]['url']
+
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
+        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
+        await ctx.send(f"Playing {videotitle}")
+        videotitle = videotitle + "       "
+
+
+async def youtube_p3(ctx):
+    messages = await ctx.history(limit=20).flatten()
+    word = ">y"
+    i = 0
+    for msg in messages:
+        if word in msg.content:
+            no_post_3 = 1
+            name = msg.content
+            break
+        else:
+            no_post_3 = 0
+
+    if no_post_3 == 0:
+        await ctx.send('Повторите запрос')
+    else:
+        voice_channel = ctx.message.author.voice.channel
+        v_c = ctx.channel.guild.voice_client
+        url_name = name.replace('>y ', '')
+        videosSearch = VideosSearch(url_name, limit=3)
+        res_url_1 = videosSearch.result()['result'][2]['link']
+
+        await bot.change_presence(activity=Activity(name="music", type=ActivityType.listening))
+        voice_channel = ctx.message.author.voice.channel
+        voice = ctx.channel.guild.voice_client
+        if voice is None:
+            voice = await voice_channel.connect()
+        else:
+            ctx.voice_client.stop()
+
+        with YoutubeDL(YDL_OPTIONS) as ydl:
+            ydl.cache.remove()
+            if 'https://' in res_url_1:
+                info = ydl.extract_info(res_url_1, download=False)
+
+        videotitle = info.get('title')
+
+        URL = info['formats'][0]['url']
+
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
+        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
+        await ctx.send(f"Playing {videotitle}")
+        videotitle = videotitle + "       "
+
+
+async def youtube_p4(ctx):
+    messages = await ctx.history(limit=20).flatten()
+    word = ">y"
+    i = 0
+    for msg in messages:
+        if word in msg.content:
+            no_post_3 = 1
+            name = msg.content
+            break
+        else:
+            no_post_3 = 0
+
+    if no_post_3 == 0:
+        await ctx.send('Повторите запрос')
+    else:
+        voice_channel = ctx.message.author.voice.channel
+        v_c = ctx.channel.guild.voice_client
+        url_name = name.replace('>y ', '')
+        videosSearch = VideosSearch(url_name, limit=4)
+        res_url_1 = videosSearch.result()['result'][3]['link']
+
+        await bot.change_presence(activity=Activity(name="music", type=ActivityType.listening))
+        voice_channel = ctx.message.author.voice.channel
+        voice = ctx.channel.guild.voice_client
+        if voice is None:
+            voice = await voice_channel.connect()
+        else:
+            ctx.voice_client.stop()
+
+        with YoutubeDL(YDL_OPTIONS) as ydl:
+            ydl.cache.remove()
+            if 'https://' in res_url_1:
+                info = ydl.extract_info(res_url_1, download=False)
+            else:
+                info = ydl.extract_info(f"ytsearch:{res_url_1}", download=False)['entries'][0]
+        videotitle = info.get('title')
+
+        URL = info['formats'][0]['url']
+
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
+        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
+        await ctx.send(f"Playing {videotitle}")
+        videotitle = videotitle + "       "
+
+
+async def youtube_p5(ctx):
+    messages = await ctx.history(limit=20).flatten()
+    word = ">y"
+    i = 0
+    for msg in messages:
+        if word in msg.content:
+            no_post_3 = 1
+            name = msg.content
+            break
+        else:
+            no_post_3 = 0
+
+    if no_post_3 == 0:
+        await ctx.send('Повторите запрос')
+    else:
+        voice_channel = ctx.message.author.voice.channel
+        v_c = ctx.channel.guild.voice_client
+        url_name = name.replace('>y ', '')
+        videosSearch = VideosSearch(url_name, limit=5)
+        res_url_1 = videosSearch.result()['result'][4]['link']
+
+        await bot.change_presence(activity=Activity(name="music", type=ActivityType.listening))
+        voice_channel = ctx.message.author.voice.channel
+        voice = ctx.channel.guild.voice_client
+        if voice is None:
+            voice = await voice_channel.connect()
+        else:
+            ctx.voice_client.stop()
+
+        with YoutubeDL(YDL_OPTIONS) as ydl:
+            ydl.cache.remove()
+            if 'https://' in res_url_1:
+                info = ydl.extract_info(res_url_1, download=False)
+            else:
+                info = ydl.extract_info(f"ytsearch:{res_url_1}", download=False)['entries'][0]
+        videotitle = info.get('title')
+
+        URL = info['formats'][0]['url']
+
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
+        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
+        await ctx.send(f"Playing {videotitle}")
+        videotitle = videotitle + "       "
 
 
 @bot_command.command()  # Every_day_commands
