@@ -20,7 +20,7 @@ YDL_OPTIONS = {'format': 'worstaudio/best',
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
 
-@bot_command.event
+@bot_command.event  # Event + news_day
 async def news_stopgame(bot):
     channel = bot.get_channel(982738188911132683)
     passers_1 = requests.get("https://stopgame.ru/news")
@@ -162,13 +162,12 @@ async def news_genshinimpact(bot):
             pass
 
 
-@bot_command.command()
-async def ok(ctx):
+@bot_command.command()  # Massage
+async def ok(ctx):  # return answer
     await ctx.send('ok')
-    # return answer
 
 
-@bot_command.command()
+@bot_command.command()  # Music + radio
 async def radio(ctx):  # Radio-list bot
     if ctx.author.voice is None:
         return await ctx.send("You are not connected to a voice channel")
@@ -176,7 +175,6 @@ async def radio(ctx):  # Radio-list bot
         return await ctx.send(" Radio-list:\n>Energy\n>Dacha\n>Evropa\n")
 
 
-@bot_command.command()
 async def redio_Energy(ctx, bot):
     if ctx.author.voice is None:
         return await ctx.send("You are not connected to a voice channel")
@@ -195,7 +193,6 @@ async def redio_Energy(ctx, bot):
         ctx.voice_client.play(FFmpegPCMAudio("https://pub0201.101.ru:8443/stream/air/mp3/256/99"), )
 
 
-@bot_command.command()
 async def redio_Dacha(ctx, bot):
     if ctx.author.voice is None:
         return await ctx.send("You are not connected to a voice channel")
@@ -215,7 +212,6 @@ async def redio_Dacha(ctx, bot):
             "https://stream2.n340.com/12_dacha_28_reg_1093?type=.aac&UID=C21958B7AA80EA280465EA8518C6F363"), )
 
 
-@bot_command.command()
 async def redio_Evropa(ctx, bot):
     if ctx.author.voice is None:
         return await ctx.send("You are not connected to a voice channel")
@@ -234,36 +230,6 @@ async def redio_Evropa(ctx, bot):
         ctx.voice_client.play(FFmpegPCMAudio("https://ep256.hostingradio.ru:8052/europaplus256.mp3"), )
 
 
-@bot_command.command()
-async def join(ctx):  # Connect bot
-    channel = ctx.author.voice.channel
-    await channel.connect()
-
-
-@bot_command.command()
-async def leave(ctx):  # Disconnect bot
-    await ctx.voice_client.disconnect()
-
-
-@bot_command.command()
-async def stop(ctx, bot):  # Stop music bot
-    ctx.voice_client.stop()
-    await bot.change_presence(status=discord.Status.online,activity=discord.Activity(name="Звуки тишины", type=discord.ActivityType.listening))
-
-
-@bot_command.command()
-async def helping(ctx):  # Write-trigger bot
-    await ctx.send("Commands bot:\n"
-                   ">helping - Помощь по командам\n"
-                   ">radio - Список доступных радио волн\n"
-                   ">play [URL]- Проигрывание песен по ссылки\n"
-                   ">playr [URL]- Проигрывание песен по ссылки c повтороением\n"
-                   ">join - Подключить бота к каналу\n"
-                   ">leave - Отключить бота от канала\n"
-                   ">stop - Остановить песню")
-
-
-@bot_command.command()
 async def play(ctx, arg, bot):  # Http ran
     arg = str(arg).replace("(", "")
     arg = str(arg).replace(')', '')
@@ -282,8 +248,6 @@ async def play(ctx, arg, bot):  # Http ran
             info = ydl.extract_info(arg, download=False)
         else:
             info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
-            # videotitle = info.get('title')
-            # await ctx.send(f"{videotitle}")
     videotitle = info.get('title')
     URL = info['formats'][0]['url']
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name = videotitle, type = discord.ActivityType.listening))
@@ -299,4 +263,57 @@ async def play(ctx, arg, bot):  # Http ran
         await sleep(1)
     if not v_c.is_paused():
         await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name = "Звук тишины", type = discord.ActivityType.listening))
-    # await v_c.disconnect()
+
+
+@bot_command.command()  # Youtube_list
+async def youtube_list(arg):  # Youtube
+    arg = str(arg).replace("(", "")
+    arg = str(arg).replace(')', '')
+    arg = str(arg).replace(',', '')
+    arg = str(arg).replace("'", "")
+    channel = "982160360897396736"
+    videosSearch = VideosSearch(arg, limit=5)
+    res_name_1 = videosSearch.result()['result'][0]['title']
+    res_url_1 = videosSearch.result()['result'][0]['link']
+    res_name_2 = videosSearch.result()['result'][1]['title']
+    res_url_2 = videosSearch.result()['result'][1]['link']
+    res_name_3 = videosSearch.result()['result'][2]['title']
+    res_url_3 = videosSearch.result()['result'][2]['link']
+    res_name_4 = videosSearch.result()['result'][3]['title']
+    res_url_4 = videosSearch.result()['result'][3]['link']
+    res_name_5 = videosSearch.result()['result'][4]['title']
+    res_url_5 = videosSearch.result()['result'][4]['link']
+
+    await ctx.send("Для начала введите команду >p[номер]:")
+    await ctx.send("1) " + res_name_1)
+    await ctx.send("2) " + res_name_2)
+    await ctx.send("3) " + res_name_3)
+    await ctx.send("4) " + res_name_4)
+    await ctx.send("5) " + res_name_5)
+
+
+@bot_command.command()  # Every_day_commands
+async def join(ctx):  # Connect bot
+    channel = ctx.author.voice.channel
+    await channel.connect()
+
+
+async def leave(ctx):  # Disconnect bot
+    await ctx.voice_client.disconnect()
+
+
+async def stop(ctx, bot):  # Stop music bot
+    ctx.voice_client.stop()
+    await bot.change_presence(status=discord.Status.online,activity=discord.Activity(name="Звуки тишины", type=discord.ActivityType.listening))
+
+
+async def helping(ctx):  # Write-trigger bot
+    await ctx.send("Commands bot:\n"
+                   ">helping - Помощь по командам\n"
+                   ">radio - Список доступных радио волн\n"
+                   ">play [URL]- Проигрывание песен по ссылки\n"
+                   ">playr [URL]- Проигрывание песен по ссылки c повтороением\n"
+                   ">join - Подключить бота к каналу\n"
+                   ">leave - Отключить бота от канала\n"
+                   ">stop - Остановить песню")
+

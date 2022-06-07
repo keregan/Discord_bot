@@ -43,30 +43,8 @@ async def p(ctx, *arg):
 
 
 @bot.command()
-async def y(ctx, *arg):  # Youtube
-    arg = str(arg).replace("(", "")
-    arg = str(arg).replace(')', '')
-    arg = str(arg).replace(',', '')
-    arg = str(arg).replace("'", "")
-    channel = "982160360897396736"
-    videosSearch = VideosSearch(arg, limit=5)
-    res_name_1 = videosSearch.result()['result'][0]['title']
-    res_url_1 = videosSearch.result()['result'][0]['link']
-    res_name_2 = videosSearch.result()['result'][1]['title']
-    res_url_2 = videosSearch.result()['result'][1]['link']
-    res_name_3 = videosSearch.result()['result'][2]['title']
-    res_url_3 = videosSearch.result()['result'][2]['link']
-    res_name_4 = videosSearch.result()['result'][3]['title']
-    res_url_4 = videosSearch.result()['result'][3]['link']
-    res_name_5 = videosSearch.result()['result'][4]['title']
-    res_url_5 = videosSearch.result()['result'][4]['link']
-
-    await ctx.send("Для начала введите команду >p[номер]:")
-    await ctx.send("1) " + res_name_1)
-    await ctx.send("2) " + res_name_2)
-    await ctx.send("3) " + res_name_3)
-    await ctx.send("4) " + res_name_4)
-    await ctx.send("5) " + res_name_5)
+async def y(*arg):  # Youtube_list
+    await command_dis.youtube_list(arg)
 
 
 @bot.command()
