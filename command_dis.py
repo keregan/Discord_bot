@@ -99,7 +99,7 @@ async def genshin_hub(bot):
 
 
 async def genshin_giarts(bot):
-    channel = bot.get_channel(982160360897396736)
+    channel = bot.get_channel(954827377085669396)
     vk_pars = "133a17f4133a17f4133a17f4421346fe9c1133a133a17f471a7b0c5bcca6560b561d7f0"
     vk_ver = "5.131"
     domain = "giarts"
@@ -114,6 +114,7 @@ async def genshin_giarts(bot):
                            }
                            )
     posts = reponse.json()['response']['items']
+
     i = 0
     for post in posts:
         try:
@@ -122,18 +123,19 @@ async def genshin_giarts(bot):
                 if post[0]["type"] == "photo":
                     for i in range(len(post)):
                         url_photo = post[i]['photo']['sizes'][-1]['url']
-                        messages = await channel.history(limit=200).flatten()
-                        word = url_photo
-                        i = 0
-                        for msg in messages:
-                            if msg.content == word:
-                                no_post_2 = 0
-                                break
-                            else:
-                                no_post_2 = 1
-                        if no_post_2 == 1:
-                            await channel.send(url_photo)
-                        await asyncio.sleep(1)
+                        if url_photo[11] == "9":
+                            messages = await channel.history(limit=200).flatten()
+                            word = url_photo
+                            i = 0
+                            for msg in messages:
+                                if msg.content == word:
+                                    no_post_2 = 0
+                                    break
+                                else:
+                                    no_post_2 = 1
+                            if no_post_2 == 1:
+                                await channel.send(url_photo)
+                            await asyncio.sleep(1)
         except:
             pass
 
@@ -217,6 +219,42 @@ async def news_genshinimpact(bot):
             await channel.send(img_post)
         except:
             pass
+
+
+async def promo_genshinimpact (bot):
+    channel = bot.get_channel(982738188911132683)
+    vk_pars = "133a17f4133a17f4133a17f4421346fe9c1133a133a17f471a7b0c5bcca6560b561d7f0"
+    vk_ver = "5.131"
+    domain = "genshinpromo"
+
+    reponse = requests.get('https://api.vk.com/method/wall.get',
+                           params={
+                               'access_token': vk_pars,
+                               'v': vk_ver,
+                               'domain': domain,
+                               'count': 1,
+                               'offset': 1
+                           }
+                           )
+    data = reponse.json()['response']['items']
+    for post in data:
+            text_post = post['text']
+            if "Промокоды:" in text_post:
+                promokod = 1
+            else:
+                promokod = 0
+
+            messages = await channel.history(limit=200).flatten()
+            i = 0
+            for msg in messages:
+                if msg.content == text_post:
+                    no_post_2 = 0
+                    break
+                else:
+                    no_post_2 = 1
+            if no_post_2 == 1:
+                if promokod == 1:
+                    await channel.send("<@&983836821383442462> " + text_post)
 
 
 @bot_command.command()  # Massage

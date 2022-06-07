@@ -27,6 +27,8 @@ def main():
     async def on_ready():  # Start bot
         print('Bot connect')
         while True:
+            await command_dis.promo_genshinimpact(bot)
+
             await command_dis.news_stopgame(bot)  # StopGame news
             await asyncio.sleep(1)
             await command_dis.news_genshinimpact(bot)  # GenshinImpact news
@@ -36,6 +38,7 @@ def main():
             await command_dis.genshin_giarts(bot)  # GenshinImpact art
             await asyncio.sleep(1)
 
+            await asyncio.sleep(1)
             random_poss = random.randint(55, 180)
             await asyncio.sleep(random_poss)
 
