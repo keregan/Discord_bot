@@ -1,15 +1,9 @@
 import asyncio
 import random
-from asyncio import sleep
-from dataclasses import replace
-import command_dis
 import discord
-import requests
-from bs4 import BeautifulSoup as BS, BeautifulSoup
-from discord import ActivityType, Activity, FFmpegPCMAudio
 from discord.ext import commands
-from youtube_dl import YoutubeDL
-from youtubesearchpython import VideosSearch
+
+import command_dis
 
 bot = commands.Bot(command_prefix='>')
 client = discord.Client()
@@ -27,7 +21,7 @@ def main():
     async def on_ready():  # Start bot
         print('Bot connect')
         while True:
-            await command_dis.promo_genshinimpact(bot)
+            await command_dis.free_game(bot)
 
             await command_dis.news_stopgame(bot)  # StopGame news
             await asyncio.sleep(1)
@@ -37,10 +31,29 @@ def main():
             await asyncio.sleep(1)
             await command_dis.genshin_giarts(bot)  # GenshinImpact art
             await asyncio.sleep(1)
-
+            await command_dis.promo_genshinimpact(bot)
             await asyncio.sleep(1)
+            await command_dis.epic_games(bot)
             random_poss = random.randint(55, 180)
             await asyncio.sleep(random_poss)
+
+        # @bot.event
+
+    @bot.command()
+    async def stop(ctx):
+        await command_dis.stop(ctx, bot)
+
+    @bot.command()
+    async def skip(ctx):
+        await command_dis.skip(ctx, bot)
+
+    @bot.command()
+    async def pause(ctx):
+        await command_dis.pause(ctx)
+
+    @bot.command()
+    async def resume(ctx):
+        await command_dis.resume(ctx)
 
     @bot.command()
     async def p(ctx, *arg):
@@ -75,32 +88,12 @@ def main():
         await command_dis.ok(ctx)
 
     @bot.command()
-    async def radio(ctx):  # Radio list
-        await command_dis.radio(ctx)
-
-    @bot.command()
-    async def Energy(ctx):  # Radio Energy
-        await command_dis.redio_Energy(ctx, bot)
-
-    @bot.command()
-    async def Dacha(ctx):  # Radio Dacha
-        await command_dis.redio_Dacha(ctx, bot)
-
-    @bot.command()
-    async def Evropa(ctx):  # Radio Evropa
-        await command_dis.redio_Evropa(ctx, bot)
-
-    @bot.command()
     async def join(ctx):  # Connect bot
         await command_dis.join(ctx)
 
     @bot.command()
     async def leave(ctx):  # Disconnect bot
         await command_dis.leave(ctx)
-
-    @bot.command()
-    async def stop(ctx):  # Stop music bot
-        await command_dis.stop(ctx, bot)
 
     @bot.command()
     async def helping(ctx):  # Write-trigger bot

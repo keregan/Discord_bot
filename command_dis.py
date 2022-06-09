@@ -2,7 +2,7 @@ import asyncio
 import random
 from asyncio import sleep
 from dataclasses import replace
-import command_dis
+import ffmpeg
 import discord
 import requests
 from bs4 import BeautifulSoup as BS, BeautifulSoup
@@ -11,12 +11,20 @@ from discord.ext import commands
 from youtube_dl import YoutubeDL
 from youtubesearchpython import VideosSearch
 
-global v_c
+global v_c, play_list, stoping
+headers = {
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
+    }
+# Test: 982160360897396736
+# News: 982738188911132683
+
+play_list = []
+stoping = []
 bot_command = commands.Bot(command_prefix='>')
 client = discord.Client()
 
 YDL_OPTIONS = {'format': 'worstaudio/best',
-               'noplaylist': 'False', 'simulate': 'True', 'preferredquality': '192', 'preferredcodec': 'mp3',
+               'noplaylist': 'True', 'simulate': 'True', 'preferredquality': '192', 'preferredcodec': 'mp3',
                'key': 'FFmpegExtractAudio'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
@@ -140,6 +148,78 @@ async def genshin_giarts(bot):
             pass
 
 
+async def epic_games(bot):
+    channel = bot.get_channel(982738188911132683)
+    vk_pars = "133a17f4133a17f4133a17f4421346fe9c1133a133a17f471a7b0c5bcca6560b561d7f0"
+    vk_ver = "5.131"
+    domain = "-198731846"
+
+    reponse = requests.get('https://api.vk.com/method/wall.get',
+                           params={
+                               'access_token': vk_pars,
+                               'v': vk_ver,
+                               'owner_id': domain,
+                               'count': 1,
+                               'offset': 1
+                           }
+                           )
+    data = reponse.json()['response']['items']
+    for post in data:
+        try:
+            text_post = post['text']
+        except:
+            text_post = 'pass'
+
+    messages = await channel.history(limit=500).flatten()
+    i = 0
+    for msg in messages:
+        if msg.content == text_post:
+            no_post_2 = 0
+            break
+        else:
+            no_post_2 = 1
+    if no_post_2 == 1:
+        await channel.send(text_post)
+
+
+async def free_game(bot):
+    channel = bot.get_channel(982738188911132683)
+    vk_pars = "133a17f4133a17f4133a17f4421346fe9c1133a133a17f471a7b0c5bcca6560b561d7f0"
+    vk_ver = "5.131"
+    domain = "frexgames"
+
+    reponse = requests.get('https://api.vk.com/method/wall.get',
+                           params={
+                               'access_token': vk_pars,
+                               'v': vk_ver,
+                               'domain': domain,
+                               'count': 1,
+                               'offset': 1
+                           }
+                           )
+    data = reponse.json()['response']['items']
+    for post in data:
+        try:
+            text_post = post['text']
+        except:
+            text_post = ''
+        try:
+            img_post = post['attachments'][0]['photo']['sizes'][-1]['url']
+        except:
+            img_post = ''
+    messages = await channel.history(limit=500).flatten()
+    i = 0
+    for msg in messages:
+        if msg.content == text_post:
+            no_post_2 = 0
+            break
+        else:
+            no_post_2 = 1
+    if no_post_2 == 1:
+        await channel.send(text_post)
+        await channel.send(img_post)
+
+
 async def news_genshinimpact(bot):
     channel = bot.get_channel(982738188911132683)
     vk_pars = "133a17f4133a17f4133a17f4421346fe9c1133a133a17f471a7b0c5bcca6560b561d7f0"
@@ -244,7 +324,7 @@ async def promo_genshinimpact (bot):
             else:
                 promokod = 0
 
-            messages = await channel.history(limit=200).flatten()
+            messages = await channel.history(limit=600).flatten()
             i = 0
             for msg in messages:
                 if msg.content == text_post:
@@ -257,74 +337,20 @@ async def promo_genshinimpact (bot):
                     await channel.send("<@&983836821383442462> " + text_post)
 
 
+async def play_list_music(ctx):
+    v_c = ctx.channel.guild.voice_client
+    if v_c != True:
+        print("a")
+    else:
+        print("b")
+
+
 @bot_command.command()  # Massage
 async def ok(ctx):  # return answer
     await ctx.send('ok')
 
 
-@bot_command.command()  # Music + radio
-async def radio(ctx):  # Radio-list bot
-    if ctx.author.voice is None:
-        return await ctx.send("You are not connected to a voice channel")
-    else:
-        return await ctx.send(" Radio-list:\n>Energy\n>Dacha\n>Evropa\n")
-
-
-async def redio_Energy(ctx, bot):
-    if ctx.author.voice is None:
-        return await ctx.send("You are not connected to a voice channel")
-    else:
-        if ctx.author.voice.channel is None:
-            channel = ctx.author.voice.channel
-            await channel.connect()
-        await bot.change_presence(status=discord.Status.online,
-                                  activity=discord.Activity(name="Radio Energy", type=discord.ActivityType.listening))
-        voice_channel = ctx.message.author.voice.channel
-        voice = ctx.channel.guild.voice_client
-        if voice is None:
-            voice = await voice_channel.connect()
-        else:
-            ctx.voice_client.stop()
-        ctx.voice_client.play(FFmpegPCMAudio("https://pub0201.101.ru:8443/stream/air/mp3/256/99"), )
-
-
-async def redio_Dacha(ctx, bot):
-    if ctx.author.voice is None:
-        return await ctx.send("You are not connected to a voice channel")
-    else:
-        if ctx.author.voice.channel is None:
-            channel = ctx.author.voice.channel
-            await channel.connect()
-        await bot.change_presence(status=discord.Status.online,
-                                  activity=discord.Activity(name="Radio Dacha", type=discord.ActivityType.listening))
-        voice_channel = ctx.message.author.voice.channel
-        voice = ctx.channel.guild.voice_client
-        if voice is None:
-            voice = await voice_channel.connect()
-        else:
-            ctx.voice_client.stop()
-        ctx.voice_client.play(FFmpegPCMAudio(
-            "https://stream2.n340.com/12_dacha_28_reg_1093?type=.aac&UID=C21958B7AA80EA280465EA8518C6F363"), )
-
-
-async def redio_Evropa(ctx, bot):
-    if ctx.author.voice is None:
-        return await ctx.send("You are not connected to a voice channel")
-    else:
-        if ctx.author.voice.channel is None:
-            channel = ctx.author.voice.channel
-            await channel.connect()
-        await bot.change_presence(status=discord.Status.online,
-                                  activity=discord.Activity(name="Radio Evropa", type=discord.ActivityType.listening))
-        voice_channel = ctx.message.author.voice.channel
-        voice = ctx.channel.guild.voice_client
-        if voice is None:
-            voice = await voice_channel.connect()
-        else:
-            ctx.voice_client.stop()
-        ctx.voice_client.play(FFmpegPCMAudio("https://ep256.hostingradio.ru:8052/europaplus256.mp3"), )
-
-
+@bot_command.command()  # Music
 async def play(ctx, arg, bot):  # Http ran
     arg = str(arg).replace("(", "")
     arg = str(arg).replace(')', '')
@@ -334,30 +360,78 @@ async def play(ctx, arg, bot):  # Http ran
     v_c = ctx.channel.guild.voice_client
     if v_c is None:
         v_c = await voice_channel.connect()
-    else:
-        ctx.voice_client.stop()
 
+    play_list.append(arg)
+
+    while v_c.is_playing():
+        print(play_list)
+        await sleep(5)
     with YoutubeDL(YDL_OPTIONS) as ydl:
         ydl.cache.remove()
         if 'https://' in arg:
-            info = ydl.extract_info(arg, download=False)
+            info = ydl.extract_info(play_list[0], download=False)
         else:
-            info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
+            info = ydl.extract_info(f"ytsearch:{play_list[0]}", download=False)['entries'][0]
     videotitle = info.get('title')
     URL = info['formats'][0]['url']
-    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name = videotitle, type = discord.ActivityType.listening))
-    v_c.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
+    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+    v_c.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )  # after="play_next_song"
     videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
     await ctx.send(f"Playing {videotitle}")
     videotitle = videotitle + "       "
+    play_list.pop(0)
+
     while v_c.is_playing:
         await asyncio.sleep(1)
         videotitle = videotitle[1:] + videotitle[0]
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name = videotitle, type = discord.ActivityType.listening))
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
     while v_c.is_playing():
         await sleep(1)
     if not v_c.is_paused():
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name = "Звук тишины", type = discord.ActivityType.listening))
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name="Звук тишины", type=discord.ActivityType.listening))
+
+
+async def pause(ctx):
+    voice_client = ctx.channel.guild.voice_client
+    if voice_client.is_playing():
+        stoping = play_list.copy()
+        play_list.clear()
+        voice_client.pause()
+    else:
+        await ctx.send("The bot is not playing anything at the moment.")
+
+
+async def stop(ctx, bot):
+    voice_client = ctx.channel.guild.voice_client
+    if voice_client.is_playing():
+        play_list.clear()
+        voice_client.stop()
+
+        await bot.change_presence(status=discord.Status.online,
+                                  activity=discord.Activity(name="Звуки тишины", type=discord.ActivityType.listening))
+    else:
+        await ctx.send("Бот и так молчит")
+
+
+async def resume(ctx):
+    voice_client = ctx.channel.guild.voice_client
+    if voice_client.is_paused():
+        play_list = stoping.copy()
+        stoping.clear()
+        await voice_client.resume()
+    else:
+        await ctx.send("Пауза - это святое")
+
+
+async def skip(ctx, bot):
+    voice_client = ctx.message.guild.voice_client
+    print(play_list[0])
+    if len(play_list) != 0:
+        await ctx.send("Плейлист не пуст")
+        # self.skip_votes.clear()
+    else:
+        await ctx.send("Плейлист пуст")
+        # self.skip_votes.clear()
 
 
 @bot_command.command()  # Youtube_list
@@ -627,11 +701,6 @@ async def join(ctx):  # Connect bot
 
 async def leave(ctx):  # Disconnect bot
     await ctx.voice_client.disconnect()
-
-
-async def stop(ctx, bot):  # Stop music bot
-    ctx.voice_client.stop()
-    await bot.change_presence(status=discord.Status.online,activity=discord.Activity(name="Звуки тишины", type=discord.ActivityType.listening))
 
 
 async def helping(ctx):  # Write-trigger bot
