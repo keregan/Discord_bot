@@ -20,24 +20,22 @@ def main():
     @bot.event
     async def on_ready():  # Start bot
         print('Bot connect')
-        while True:
-            await command_dis.free_game(bot)
-
-            await command_dis.news_stopgame(bot)  # StopGame news
-            await asyncio.sleep(1)
-            await command_dis.news_genshinimpact(bot)  # GenshinImpact news
-            await asyncio.sleep(1)
-            await command_dis.genshin_hub(bot)  # GenshinImpact art
-            await asyncio.sleep(1)
-            await command_dis.genshin_giarts(bot)  # GenshinImpact art
-            await asyncio.sleep(1)
-            await command_dis.promo_genshinimpact(bot)
-            await asyncio.sleep(1)
-            await command_dis.epic_games(bot)
-            random_poss = random.randint(55, 180)
-            await asyncio.sleep(random_poss)
-
-        # @bot.event
+        # while True:
+        #     await command_dis.free_game(bot)
+        #
+        #     # await command_dis.news_stopgame(bot)  # StopGame news
+        #     await asyncio.sleep(1)
+        #     await command_dis.news_genshinimpact(bot)  # GenshinImpact news
+        #     await asyncio.sleep(1)
+        #     await command_dis.genshin_hub(bot)  # GenshinImpact art
+        #     await asyncio.sleep(1)
+        #     await command_dis.genshin_giarts(bot)  # GenshinImpact art
+        #     await asyncio.sleep(1)
+        #     await command_dis.promo_genshinimpact(bot)
+        #     await asyncio.sleep(1)
+        #     await command_dis.epic_games(bot)
+        #     random_poss = random.randint(55, 180)
+        #     await asyncio.sleep(random_poss)
 
     @bot.command()
     async def stop(ctx):
@@ -45,7 +43,7 @@ def main():
 
     @bot.command()
     async def skip(ctx):
-        await command_dis.skip(ctx, bot)
+        await command_dis.skip(ctx)
 
     @bot.command()
     async def pause(ctx):
@@ -84,16 +82,16 @@ def main():
         await command_dis.youtube_p5(ctx, bot)
 
     @bot.command()
-    async def ok(ctx):  # Write-trigger bot 'ok'
-        await command_dis.ok(ctx)
+    async def o(ctx):  # Write-trigger bot 'ok'
+        await command_dis.o(ctx)
 
     @bot.command()
     async def join(ctx):  # Connect bot
-        await command_dis.join(ctx)
+        await command_dis.join(ctx, bot)
 
     @bot.command()
     async def leave(ctx):  # Disconnect bot
-        await command_dis.leave(ctx)
+        await command_dis.leave(ctx, bot)
 
     @bot.command()
     async def helping(ctx):  # Write-trigger bot
@@ -102,4 +100,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-bot.run('OTgxOTM0NzM1MDY2NTUwMzEy.GW_gVb.bdlkuj0_xH2wAGQSMrI595SDHcsy6xXHg8wORo')
+bot.run('OTgxOTM0NzM1MDY2NTUwMzEy.GYP2_i._iB6UWT2zepdC4LOPboN2xdW2X93umRajS6VuA')

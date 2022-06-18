@@ -1,5 +1,7 @@
 import asyncio
+import re
 import random
+import time
 from asyncio import sleep
 from dataclasses import replace
 import ffmpeg
@@ -11,22 +13,66 @@ from discord.ext import commands
 from youtube_dl import YoutubeDL
 from youtubesearchpython import VideosSearch
 
-global v_c, play_list, stoping
+global v_c, play_list
 headers = {
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
-    }
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
+}
 # Test: 982160360897396736
 # News: 982738188911132683
 
 play_list = []
-stoping = []
 bot_command = commands.Bot(command_prefix='>')
 client = discord.Client()
 
 YDL_OPTIONS = {'format': 'worstaudio/best',
-               'noplaylist': 'True', 'simulate': 'True', 'preferredquality': '192', 'preferredcodec': 'mp3',
+               'noplaylist': 'False', 'simulate': 'True', 'preferredquality': '192', 'preferredcodec': 'mp3',
                'key': 'FFmpegExtractAudio'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+
+
+def umg(text):
+    url_text = r'http(?:s)?://\S+'
+    link_img = re.findall(url_text, text)
+    for item in link_img:
+        item = str(item).replace("]", "")
+        item = str(item).replace("[", "")
+        item = str(item).replace("'", "")
+        up_link_img = "*" + item + "*"
+        caption = text.replace(item, up_link_img)
+        text = caption
+    return text
+
+
+# def separation():
+#     printing = "-"
+#     for i in range(100):
+#         printing = printing + "-"
+#     return printing
+
+
+def play_voise(ctx):
+    voice_client = ctx.channel.guild.voice_client
+    print(play_list)
+    # if len(play_list) != 0:
+    #     if not voice_client.is_playing():
+    URL = play_list[0]
+    voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )  # after=lambda e: play_voise(ctx)
+    # await bot.change_presence(status=discord.Status.online,
+    #                           activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+    # videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
+    # await ctx.send(f"Playing {videotitle}")
+    # videotitle = videotitle + "       "
+    play_list.pop(0)
+
+
+@bot_command.command()
+async def join(ctx, bot):  # Connect bot
+    if ctx.author.voice:
+        if not ctx.guild.voice_client in bot.voice_clients:
+            channel = ctx.message.author.voice.channel
+            await channel.connect()
+    else:
+        await ctx.send("Вы где?")
 
 
 @bot_command.event  # Event + news_day
@@ -63,6 +109,7 @@ async def news_stopgame(bot):
             no_post_1 = 1
 
     if no_post_1 == 1:
+        await channel.send(separation())
         await channel.send(las_end)
 
 
@@ -167,6 +214,7 @@ async def epic_games(bot):
     for post in data:
         try:
             text_post = post['text']
+            text_post = umg(text_post)
         except:
             text_post = 'pass'
 
@@ -179,6 +227,7 @@ async def epic_games(bot):
         else:
             no_post_2 = 1
     if no_post_2 == 1:
+        await channel.send(separation())
         await channel.send(text_post)
 
 
@@ -201,6 +250,7 @@ async def free_game(bot):
     for post in data:
         try:
             text_post = post['text']
+            text_post = umg(text_post)
         except:
             text_post = ''
         try:
@@ -216,6 +266,7 @@ async def free_game(bot):
         else:
             no_post_2 = 1
     if no_post_2 == 1:
+        await channel.send(separation())
         await channel.send(text_post)
         await channel.send(img_post)
 
@@ -243,6 +294,7 @@ async def news_genshinimpact(bot):
     for post in data:
         try:
             text_post = post['text']
+            text_post = umg(text_post)
         except:
             text_post = 'pass'
 
@@ -280,7 +332,7 @@ async def news_genshinimpact(bot):
     if vid_p == "https://vk.com/video" or vid_p == "https://vk.com/video-183293188_":
         vid_p = ''
     vk_poser = "Genshin Impact последнии новости:\n" + text_post + " *" + vid_p + "*"
-    messages = await channel.history(limit=200).flatten()
+    messages = await channel.history(limit=500).flatten()
     word = vk_poser
     i = 0
     for msg in messages:
@@ -290,6 +342,7 @@ async def news_genshinimpact(bot):
         else:
             no_post_2 = 1
     if no_post_2 == 1:
+        await channel.send(separation())
         await channel.send(vk_poser)
         try:
             await channel.send(vid_img)
@@ -301,7 +354,7 @@ async def news_genshinimpact(bot):
             pass
 
 
-async def promo_genshinimpact (bot):
+async def promo_genshinimpact(bot):
     channel = bot.get_channel(982738188911132683)
     vk_pars = "133a17f4133a17f4133a17f4421346fe9c1133a133a17f471a7b0c5bcca6560b561d7f0"
     vk_ver = "5.131"
@@ -318,34 +371,27 @@ async def promo_genshinimpact (bot):
                            )
     data = reponse.json()['response']['items']
     for post in data:
-            text_post = post['text']
-            if "Промокоды:" in text_post:
-                promokod = 1
+        text_post = post['text']
+        if "Промокоды:" in text_post:
+            promokod = 1
+        else:
+            promokod = 0
+
+        messages = await channel.history(limit=600).flatten()
+        i = 0
+        for msg in messages:
+            if msg.content == text_post:
+                no_post_2 = 0
+                break
             else:
-                promokod = 0
-
-            messages = await channel.history(limit=600).flatten()
-            i = 0
-            for msg in messages:
-                if msg.content == text_post:
-                    no_post_2 = 0
-                    break
-                else:
-                    no_post_2 = 1
-            if no_post_2 == 1:
-                if promokod == 1:
-                    await channel.send("<@&983836821383442462> " + text_post)
+                no_post_2 = 1
+        if no_post_2 == 1:
+            if promokod == 1:
+                await channel.send(separation())
+                await channel.send("<@&983836821383442462> " + text_post)
 
 
-async def play_list_music(ctx):
-    v_c = ctx.channel.guild.voice_client
-    if v_c != True:
-        print("a")
-    else:
-        print("b")
-
-
-@bot_command.command()  # Massage
+@bot_command.command()
 async def ok(ctx):  # return answer
     await ctx.send('ok')
 
@@ -357,45 +403,22 @@ async def play(ctx, arg, bot):  # Http ran
     arg = str(arg).replace(',', '')
     arg = str(arg).replace("'", "")
     voice_channel = ctx.message.author.voice.channel
-    v_c = ctx.channel.guild.voice_client
-    if v_c is None:
-        v_c = await voice_channel.connect()
 
-    play_list.append(arg)
-
-    while v_c.is_playing():
-        print(play_list)
-        await sleep(5)
+    await join(ctx, bot)
     with YoutubeDL(YDL_OPTIONS) as ydl:
         ydl.cache.remove()
         if 'https://' in arg:
-            info = ydl.extract_info(play_list[0], download=False)
+            info = ydl.extract_info(arg, download=False)
         else:
-            info = ydl.extract_info(f"ytsearch:{play_list[0]}", download=False)['entries'][0]
-    videotitle = info.get('title')
+            info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
     URL = info['formats'][0]['url']
-    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
-    v_c.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )  # after="play_next_song"
-    videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
-    await ctx.send(f"Playing {videotitle}")
-    videotitle = videotitle + "       "
-    play_list.pop(0)
-
-    while v_c.is_playing:
-        await asyncio.sleep(1)
-        videotitle = videotitle[1:] + videotitle[0]
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
-    while v_c.is_playing():
-        await sleep(1)
-    if not v_c.is_paused():
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name="Звук тишины", type=discord.ActivityType.listening))
+    play_list.append(URL)
+    play_voise(ctx)
 
 
 async def pause(ctx):
     voice_client = ctx.channel.guild.voice_client
     if voice_client.is_playing():
-        stoping = play_list.copy()
-        play_list.clear()
         voice_client.pause()
     else:
         await ctx.send("The bot is not playing anything at the moment.")
@@ -411,27 +434,28 @@ async def stop(ctx, bot):
                                   activity=discord.Activity(name="Звуки тишины", type=discord.ActivityType.listening))
     else:
         await ctx.send("Бот и так молчит")
+        play_list.clear()
+        voice_client.stop()
 
 
 async def resume(ctx):
     voice_client = ctx.channel.guild.voice_client
     if voice_client.is_paused():
-        play_list = stoping.copy()
-        stoping.clear()
         await voice_client.resume()
     else:
         await ctx.send("Пауза - это святое")
 
 
-async def skip(ctx, bot):
-    voice_client = ctx.message.guild.voice_client
-    print(play_list[0])
+async def skip(ctx):
+    voice_client = ctx.channel.guild.voice_client
     if len(play_list) != 0:
-        await ctx.send("Плейлист не пуст")
-        # self.skip_votes.clear()
+        if voice_client.is_playing():
+            voice_client.stop()
+        #     play_voise(ctx)
+        # else:
+        #     play_voise(ctx)
     else:
-        await ctx.send("Плейлист пуст")
-        # self.skip_votes.clear()
+        await ctx.send("Список пуст")
 
 
 @bot_command.command()  # Youtube_list
@@ -497,20 +521,11 @@ async def youtube_p1(ctx, bot):
         videotitle = info.get('title')
 
         URL = info['formats'][0]['url']
-
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
-        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
-        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
-        await ctx.send(f"Playing {videotitle}")
-        videotitle = videotitle + "       "
-        # while v_c.is_playing:
-        #     await asyncio.sleep(1)
-        #     videotitle = videotitle[1:] + videotitle[0]
-        #     await bot.change_presence(status=discord.Status.online,
-        #                               activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
+        play_list.append(URL)
+        play_voise(ctx)
 
 
-async def youtube_p2(ctx):
+async def youtube_p2(ctx, bot):
     messages = await ctx.history(limit=20).flatten()
     word = ">y"
     i = 0
@@ -548,15 +563,11 @@ async def youtube_p2(ctx):
         videotitle = info.get('title')
 
         URL = info['formats'][0]['url']
-
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
-        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
-        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
-        await ctx.send(f"Playing {videotitle}")
-        videotitle = videotitle + "       "
+        play_list.append(URL)
+        play_voise(ctx)
 
 
-async def youtube_p3(ctx):
+async def youtube_p3(ctx, bot):
     messages = await ctx.history(limit=20).flatten()
     word = ">y"
     i = 0
@@ -594,14 +605,11 @@ async def youtube_p3(ctx):
 
         URL = info['formats'][0]['url']
 
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
-        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
-        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
-        await ctx.send(f"Playing {videotitle}")
-        videotitle = videotitle + "       "
+        play_list.append(URL)
+        play_voise(ctx)
 
 
-async def youtube_p4(ctx):
+async def youtube_p4(ctx, bot):
     messages = await ctx.history(limit=20).flatten()
     word = ">y"
     i = 0
@@ -639,15 +647,11 @@ async def youtube_p4(ctx):
         videotitle = info.get('title')
 
         URL = info['formats'][0]['url']
-
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
-        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
-        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
-        await ctx.send(f"Playing {videotitle}")
-        videotitle = videotitle + "       "
+        play_list.append(URL)
+        play_voise(ctx)
 
 
-async def youtube_p5(ctx):
+async def youtube_p5(ctx, bot):
     messages = await ctx.history(limit=20).flatten()
     word = ">y"
     i = 0
@@ -685,22 +689,21 @@ async def youtube_p5(ctx):
         videotitle = info.get('title')
 
         URL = info['formats'][0]['url']
-
-        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name=videotitle, type=discord.ActivityType.listening))
-        ctx.voice_client.play(discord.FFmpegPCMAudio(executable="C:\\ffmpeg\\bin\\ffmpeg.exe", source=URL, **FFMPEG_OPTIONS), )
-        videotitle = info.get('title', 'Video   with ID: ' + info.get('id', 'unknown'))
-        await ctx.send(f"Playing {videotitle}")
-        videotitle = videotitle + "       "
+        play_list.append(URL)
+        play_voise(ctx)
 
 
 @bot_command.command()  # Every_day_commands
-async def join(ctx):  # Connect bot
-    channel = ctx.author.voice.channel
-    await channel.connect()
-
-
-async def leave(ctx):  # Disconnect bot
-    await ctx.voice_client.disconnect()
+# async def join(ctx, bot):  # Connect bot
+#     if ctx.author.voice:
+#         if not ctx.guild.voice_client in bot.voice_clients:
+#             channel = ctx.message.author.voice.channel
+#             await channel.connect()
+#     else:
+#         await ctx.send("Вы где?")
+async def leave(ctx, bot):  # Disconnect bot
+    if ctx.guild.voice_client in bot.voice_clients:
+        await ctx.voice_client.disconnect()
 
 
 async def helping(ctx):  # Write-trigger bot
@@ -712,4 +715,3 @@ async def helping(ctx):  # Write-trigger bot
                    ">join - Подключить бота к каналу\n"
                    ">leave - Отключить бота от канала\n"
                    ">stop - Остановить песню")
-
