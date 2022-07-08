@@ -2,6 +2,7 @@ import asyncio
 import random
 import discord
 from discord.ext import commands
+import token.txt
 
 import command_dis
 
@@ -100,4 +101,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-bot.run('OTgxOTM0NzM1MDY2NTUwMzEy.GYP2_i._iB6UWT2zepdC4LOPboN2xdW2X93umRajS6VuA')
+bot.run('token.txt')
